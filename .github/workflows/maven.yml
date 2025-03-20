@@ -25,14 +25,21 @@ jobs:
     - name: Running Test Automation Framework 
       run: mvn test -Dbrowser=chrome -DisLambdaTest=false -DisHeadless=true -X
 
-    - name: Upload Test Logs
+    - name: Upload Test Logs as Artifacts
       if: always()
       uses: actions/upload-artifact@v4.6.2
       with:
         name: Test logs
         path: logs/
+
+    - name: Upload Screenshots as Artifacts
+      if: always()
+      uses: actions/upload-artifact@v4.6.2
+      with:
+        name: html-report
+        path: report.html
         
-    - name: Upload Test Reports
+    - name: Upload Test Reports as Artifacts
       if: always()
       uses: actions/upload-artifact@v4.6.2
       with:
@@ -41,6 +48,25 @@ jobs:
 
     - name: Test Execution status 
       run: echo "test execution completed"
+      
+    - name: Copy Report to gh-pages Folder
+      if: always()
+
+      run: |
+        mkdir -p public/extent-reports
+        cp -R report.html public/extent-reports/
+        cp -R screenshots/ public/extent-reports/screenshots/
+        ls -l
+
+    - name: Deploy
+      if: always()
+      uses: JamesIves/github-pages-deploy-action@v4.7.3
+      with:
+        folder: public/extent-reports/
+        token: ${{ secrets.PAT_GITHUB_PAGES }}
+        clean: true
+      
+    
      
 
     
